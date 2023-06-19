@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vote Website</title>
+  <style>
+    #resultBar {
+      width: 100%;
+      height: 20px;
+      background-color: lightgray;
+      margin-top: 10px;
+    }
+    
+    #yesBar {
+      height: 100%;
+      background-color: green;
+    }
+    
+    #noBar {
+      height: 100%;
+      background-color: red;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <h1>Vote Website</h1>
+  
+  <form id="usernameForm">
+    <label for="username">Username:</label>
+    <input type="text" id="username" required>
+    <button type="submit">Start Voting</button>
+  </form>
+  
+  <div id="voteForm" style="display: none;">
+    <h2>Vote Yes or No</h2>
+    <button id="yesButton">Yes</button>
+    <button id="noButton">No</button>
+  </div>
+  
+  <div id="winnerDisplay" style="display: none;">
+    <h2>Winner:</h2>
+    <p id="winner"></p>
+  </div>
+  
+  <div id="resultBar">
+    <div id="yesBar"></div>
+    <div id="noBar"></div>
+  </div>
+  
+  <script>
+    var participants = {};
+    var votingInProgress = false;
+    
+    function startVoting() {
+      $("#usernameForm").hide();
+      $("#voteForm").show();
+      
+      votingInProgress = true;
+      
+      setTimeout(endVoting, 15000);
+    }
+    
+    function endVoting() {
+      $("#voteForm").hide();
+      $("#winnerDisplay").show();
+      
+      votingInProgress = false;
+      
+      var participantNames = Object.keys(participants);
+      var winnerIndex = Math.floor(Math.random() * participantNames.length);
+      var winnerName = participantNames[winnerIndex];
+      
+      $("#winner").text(winnerName);
+    }
+    
+    function updateResultBar() {
+      var yesVotes = 0;
+      var noVotes = 0;
+      
+      Object.values(participants).forEach(function(participant) {
+        if (participant.vote === "Yes") {
+          yesVotes++;
+        } else if (participant.vote === "No") {
+          noVotes++;
+        }
+      });
+      
+      var totalParticipants = Object.keys(participants).length;
+      var yesPercentage = (yesVotes / totalParticipants) * 100;
+      var noPercentage = (noVotes / totalParticipants) * 100;
+      
+      $("#yesBar").css("width", yesPercentage + "%");
+      $("#noBar").css("width", noPercentage + "%");
+    }
+    
+    $("#usernameForm").submit(function(event) {
+      event.preventDefault();
+      
+      var username = $("#username").val();
+      
+      if (!votingInProgress) {
+        participants = {}; // Reset participants if new voting session starts
+      }
+      
+      participants[username] = { vote: null };
+      
+      startVoting();
+      
+      setTimeout(function() {
+        participants = {};
+        $("#winnerDisplay").hide();
+        $("#usernameForm").show();
+      }, 20000);
+    });
+    
+    $("#yesButton").click(function() {
+      if (votingInProgress) {
+        var username = $("#username").val();
+        
+        participants[username].vote = "Yes";
+        
+        updateResultBar();
+      }
+    });
+    
+    $("#noButton").click(function() {
+      if (votingInProgress) {
+        var username = $("#username").val();
+        
+        participants[username].vote = "No";
+        
+        updateResultBar();
+      }
+    });
+  </script>
+</body>
+</html>
